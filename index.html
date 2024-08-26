@@ -1,11 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <script src="index.js"></script>
-  </body>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Matriz</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Botón para mostrar el primer modal -->
+    <button id="openModal">Generar Matriz</button>
+
+    <!-- Primer modal: Pedir dimensiones -->
+    <div id="matrixModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ingrese las dimensiones de la matriz</h2>
+            <label for="rows">Filas:</label>
+            <input type="number" id="rows" min="1" required>
+            <label for="cols">Columnas:</label>
+            <input type="number" id="cols" min="1" required>
+            <button id="generateMatrix">OK</button>
+        </div>
+    </div>
+
+    <!-- Segundo modal: Mostrar inputs según dimensiones -->
+    <div id="inputModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ingrese los valores de la matriz</h2>
+            <div id="matrixInputs"></div>
+            <button id="submitMatrix">Submit</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
