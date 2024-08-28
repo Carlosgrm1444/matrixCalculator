@@ -1,63 +1,59 @@
-// Referencias a los modales y elementos
-const matrixModal = document.getElementById("matrixModal");
-const inputModal = document.getElementById("inputModal");
-const openModalBtn = document.getElementById("openModal");
-const generateMatrixBtn = document.getElementById("generateMatrix");
-const submitMatrixBtn = document.getElementById("submitMatrix");
-const closeBtns = document.querySelectorAll(".close");
+// Declara las variables filas y columnas a nivel global
+var filas, columnas;
 
-// Abrir el primer modal
-openModalBtn.onclick = () => {
-  matrixModal.style.display = "block";
-};
+document.getElementById("acceptSize").addEventListener("click", function () {
+  // Obtén los valores de filas y columnas del primer modal
+  filas = document.getElementById("input1").value;
+  columnas = document.getElementById("input2").value;
 
-// Cerrar los modales al hacer click en 'X'
-closeBtns.forEach((btn) => {
-  btn.onclick = () => {
-    btn.parentElement.parentElement.style.display = "none";
-  };
-});
+  // Cierra el primer modal
+  var sizeModal = new bootstrap.Modal(document.getElementById("sizeModal"));
+  sizeModal.hide();
 
-// Generar inputs según dimensiones
-generateMatrixBtn.onclick = () => {
-  const rows = document.getElementById("rows").value;
-  const cols = document.getElementById("cols").value;
+  // Genera la matriz de inputs
+  var matrixContainer = document.getElementById("matrixContainer");
+  matrixContainer.innerHTML = ""; // Limpia cualquier contenido anterior
 
-  if (rows > 0 && cols > 0) {
-    // Cerrar primer modal
-    matrixModal.style.display = "none";
+  for (var i = 0; i < filas; i++) {
+    var rowDiv = document.createElement("div");
+    rowDiv.className = "d-flex mb-2";
 
-    // Crear inputs en el segundo modal
-    const matrixInputs = document.getElementById("matrixInputs");
-    matrixInputs.innerHTML = ""; // Limpiar inputs anteriores
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const input = document.createElement("input");
-        input.type = "number";
-        input.placeholder = `(${i + 1},${j + 1})`;
-        matrixInputs.appendChild(input);
-      }
-      matrixInputs.appendChild(document.createElement("br"));
+    for (var j = 0; j < columnas; j++) {
+      var input = document.createElement("input");
+      input.type = "number";
+      input.className = "form-control mr-2";
+      input.placeholder = `Valor [${i + 1}, ${j + 1}]`;
+      rowDiv.appendChild(input);
     }
 
-    // Mostrar segundo modal
-    inputModal.style.display = "block";
-  } else {
-    alert("Por favor, ingrese dimensiones válidas.");
+    matrixContainer.appendChild(rowDiv);
   }
-};
 
-// Acción para el botón de submit (puedes personalizarla según tu necesidad)
-submitMatrixBtn.onclick = () => {
-  alert("Matriz generada con éxito!");
-  inputModal.style.display = "none";
-};
+  // Muestra el segundo modal
+  var matrixModal = new bootstrap.Modal(document.getElementById("matrixModal"));
+  matrixModal.show();
+});
 
-// Cerrar el modal si el usuario hace click fuera de él
-window.onclick = (event) => {
-  if (event.target == matrixModal) {
-    matrixModal.style.display = "none";
-  } else if (event.target == inputModal) {
-    inputModal.style.display = "none";
-  }
-};
+document.getElementById("saveMatrix").addEventListener("click", function () {
+  var inputs = document.querySelectorAll("#matrixContainer input");
+  var matrix = [];
+
+  // Recorre los inputs y almacena sus valores en una matriz bidimensional
+  inputs.forEach(function (input, index) {
+    var row = Math.floor(index / columnas);
+    var col = index % columnas;
+
+    if (!matrix[row]) {
+      matrix[row] = [];
+    }
+
+    matrix[row][col] = input.value;
+  });
+
+  // Imprime la matriz en la consola
+  console.log(matrix);
+
+  // Cierra el segundo modal
+  var matrixModal = new bootstrap.Modal(document.getElementById("matrixModal"));
+  matrixModal.hide();
+});
