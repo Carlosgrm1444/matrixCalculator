@@ -1,9 +1,23 @@
-let arrayList = [];
+let arrayList = [
+  [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+  ],
+  [
+    [9, 8, 7],
+    [6, 5, 4],
+    [3, 2, 1],
+  ],
+];
+
+let answers = "";
+
+document.addEventListener("DOMContentLoaded", async function () {});
 
 mc = {
   calculate: {
     askOperation: () => {
-      // Actualizar las opciones en los selects
       const matrixOptions = arrayList
         .map(
           (_, index) =>
@@ -13,7 +27,6 @@ mc = {
         )
         .join("");
 
-      // Crear el contenido del modal
       const modalContent = `
       <div class="modal fade" id="operationModal" tabindex="-1" aria-labelledby="operationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -29,7 +42,6 @@ mc = {
                   <option value="add">Suma</option>
                   <option value="subtract">Resta</option>
                   <option value="multiply">Multiplicación</option>
-                  <!-- Puedes agregar más opciones si es necesario -->
                 </select>
               </div>
               <div class="mb-3">
@@ -47,19 +59,24 @@ mc = {
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-              <button type="button" class="btn btn-primary" onclick="mc.calculate.performOperation()">Realizar Operación</button>
+              <button type="button" class="btn btn-primary" onclick="mc.calculate.performOperation()" data-bs-dismiss="modal">Realizar Operación</button>
             </div>
           </div>
         </div>
       </div>
       `;
 
-      // Insertar el contenido del modal en el body y mostrarlo
       document.body.insertAdjacentHTML("beforeend", modalContent);
       const operationModal = new bootstrap.Modal(
         document.getElementById("operationModal")
       );
       operationModal.show();
+
+      document
+        .getElementById("operationModal")
+        .addEventListener("hidden.bs.modal", function () {
+          this.remove();
+        });
     },
 
     performOperation: () => {
@@ -81,29 +98,51 @@ mc = {
       const matrixA = arrayList[matrixAIndex];
       const matrixB = arrayList[matrixBIndex];
 
+      // Verificar dimensiones de las matrices antes de realizar la operación
+      if (
+        operationType === "multiply" &&
+        matrixA[0].length !== matrixB.length
+      ) {
+        const errorMsg = `<p>Matriz A y Matriz B no se pueden multiplicar porque el número de columnas de la Matriz A no coincide con el número de filas de la Matriz B.</p><hr>`;
+        answers = errorMsg + answers;
+        document.getElementById("answerArea").innerHTML = answers;
+        return;
+      }
+
       // Lógica para realizar la operación según el tipo seleccionado
       let result;
-
+      let operationSymbol;
       switch (operationType) {
         case "add":
           result = addMatrices(matrixA, matrixB);
+          operationSymbol = "+";
           break;
         case "subtract":
           result = subtractMatrices(matrixA, matrixB);
+          operationSymbol = "-";
           break;
         case "multiply":
           result = multiplyMatrices(matrixA, matrixB);
+          operationSymbol = "*";
           break;
         default:
           alert("Operación no válida.");
           return;
       }
 
-      // Mostrar el resultado (puedes adaptar esto según tus necesidades)
-      console.log("Resultado:", result);
-
-      // Cerrar el modal
-      document.getElementById("operationModal").remove();
+      // Generar el procedimiento en HTML y almacenarlo en answers
+      // Generar el procedimiento en HTML y almacenarlo en answers
+      const resultHTML = generateMatrixOperationHTML(
+        matrixA,
+        matrixB,
+        result,
+        operationSymbol,
+        matrixAIndex, // Pasar el índice de la Matriz A
+        matrixBIndex, // Pasar el índice de la Matriz B
+        operationType // Pasar el tipo de operación seleccionado
+      );
+      answers = resultHTML + answers; // Agregar al inicio de answers para mostrar el más reciente primero
+      document.getElementById("answerArea").innerHTML = answers;
     },
   },
 
@@ -136,6 +175,7 @@ mc = {
         document.getElementById("indexModal")
       );
       indexModal.show();
+      // Escuchar el evento 'hidden.bs.modal' para eliminar el modal del DOM
     },
 
     askValues: () => {
@@ -331,6 +371,7 @@ mc = {
         document.getElementById("editMatrixModal")
       );
       editMatrixModal.show();
+      // Escuchar el evento 'hidden.bs.modal' para eliminar el modal del DOM
     },
 
     updateMatrix: (index) => {
@@ -369,26 +410,101 @@ mc = {
   },
 };
 
-// Funciones para realizar las operaciones (puedes implementar según la lógica específica)
+function generateMatrixOperationHTML(
+  matrixA,
+  matrixB,
+  result,
+  operationSymbol,
+  matrixAIndex,
+  matrixBIndex,
+  operationType
+) {
+  // Generar nombres dinámicos de las matrices basados en los índices
+  const matrixAName = `Matriz ${String.fromCharCode(65 + matrixAIndex)}`; // Convertir índice a letra (A, B, C, ...)
+  const matrixBName = `Matriz ${String.fromCharCode(65 + matrixBIndex)}`;
+
+  // Definir el nombre de la operación en base al tipo
+  let operationName;
+  switch (operationType) {
+    case "add":
+      operationName = "Suma";
+      break;
+    case "subtract":
+      operationName = "Resta";
+      break;
+    case "multiply":
+      operationName = "Multiplicación";
+      break;
+    default:
+      operationName = "Operación desconocida";
+  }
+
+  // Crear las tarjetas de las matrices utilizando los nombres dinámicos
+  const matrixACard = createMatrixCardHTML(matrixA, matrixAName);
+  const matrixBCard = createMatrixCardHTML(matrixB, matrixBName);
+  const resultCard = createMatrixCardHTML(result, "Resultado");
+
+  // Generar el HTML del procedimiento con las tarjetas y el nombre de la operación
+  let html = `<div><h4>Procedimiento:</h4><p>Operación realizada: ${operationName}</p>`;
+  html += `<div class="row">${matrixACard}<div class="col-md-1 text-center align-self-center"><h2>${operationSymbol}</h2></div>${matrixBCard}<div class="col-md-1 text-center align-self-center"><h2>=</h2></div>${resultCard}</div><hr></div>`;
+  return html;
+}
+
+function createMatrixCardHTML(matrix, title) {
+  const dimensions = `${matrix.length}x${matrix[0].length}`;
+  let matrixHTML = "<tr>";
+  matrix.forEach((row) => {
+    matrixHTML += "<tr>";
+    row.forEach((value) => {
+      matrixHTML += `<td>${value}</td>`;
+    });
+    matrixHTML += "</tr>";
+  });
+
+  return `
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <b class="text-nowrap">${title}</b>
+            <br>
+            <i>(${dimensions})</i>
+          </div>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <tbody>${matrixHTML}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Funciones para realizar las operaciones
 function addMatrices(matrixA, matrixB) {
-  // Verificar dimensiones y realizar suma
-  // Ejemplo básico:
   return matrixA.map((row, i) => row.map((value, j) => value + matrixB[i][j]));
 }
 
 function subtractMatrices(matrixA, matrixB) {
-  // Verificar dimensiones y realizar resta
-  // Ejemplo básico:
   return matrixA.map((row, i) => row.map((value, j) => value - matrixB[i][j]));
 }
 
 function multiplyMatrices(matrixA, matrixB) {
-  // Verificar dimensiones y realizar multiplicación
-  // Ejemplo básico:
-  // Multiplicación de matrices requiere comprobaciones de dimensiones
+  // Verificar dimensiones de las matrices
+  if (matrixA[0].length !== matrixB.length) {
+    alert(
+      "Las matrices no se pueden multiplicar debido a dimensiones incompatibles."
+    );
+    return;
+  }
+
+  // Inicializar la matriz de resultado con ceros
   const result = Array(matrixA.length)
     .fill(null)
     .map(() => Array(matrixB[0].length).fill(0));
+
+  // Realizar la multiplicación de matrices
   for (let i = 0; i < matrixA.length; i++) {
     for (let j = 0; j < matrixB[0].length; j++) {
       for (let k = 0; k < matrixB.length; k++) {
@@ -396,5 +512,6 @@ function multiplyMatrices(matrixA, matrixB) {
       }
     }
   }
+
   return result;
 }
