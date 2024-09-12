@@ -16,7 +16,7 @@ let answers = "";
 document.addEventListener("DOMContentLoaded", async function () {});
 
 mc = {
-  calculate: {
+  calculate: {                           
     askOperation: () => {
       const matrixOptions = arrayList
         .map(
